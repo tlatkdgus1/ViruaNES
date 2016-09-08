@@ -485,14 +485,15 @@
 }
 #endif
 
-#define	BCC()	{ if( !(R.P & C_FLAG) ) REL_JUMP(); }
-#define	BCS()	{ if(  (R.P & C_FLAG) ) REL_JUMP(); }
-#define	BNE()	{ if( !(R.P & Z_FLAG) ) REL_JUMP(); }
-#define	BEQ()	{ if(  (R.P & Z_FLAG) ) REL_JUMP(); }
-#define	BPL()	{ if( !(R.P & N_FLAG) ) REL_JUMP(); }
-#define	BMI()	{ if(  (R.P & N_FLAG) ) REL_JUMP(); }
-#define	BVC()	{ if( !(R.P & V_FLAG) ) REL_JUMP(); }
-#define	BVS()	{ if(  (R.P & V_FLAG) ) REL_JUMP(); }
+//브런치문들
+#define	BCC()	{ if( !(R.P & C_FLAG) ) REL_JUMP(); } // Carry가 0이면 점프
+#define	BCS()	{ if(  (R.P & C_FLAG) ) REL_JUMP(); } // Carry가 1이면 점프
+#define	BNE()	{ if( !(R.P & Z_FLAG) ) REL_JUMP(); } // 결과가 0이 아니면 점프
+#define	BEQ()	{ if(  (R.P & Z_FLAG) ) REL_JUMP(); } // 결과가 0이면 점프
+#define	BPL()	{ if( !(R.P & N_FLAG) ) REL_JUMP(); } // 결과가 더 크면 점프
+#define	BMI()	{ if(  (R.P & N_FLAG) ) REL_JUMP(); } // N 이 1이면 점프
+#define	BVC()	{ if( !(R.P & V_FLAG) ) REL_JUMP(); } // Overflow가 0이면 점프
+#define	BVS()	{ if(  (R.P & V_FLAG) ) REL_JUMP(); } // Overflow가 1이면 점프
 
 // フラグ制御系
 #define	CLC()	{ R.P &= ~C_FLAG; }
