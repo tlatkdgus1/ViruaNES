@@ -536,6 +536,7 @@
 	CMP();				\
 }
 
+// Program Counter 1증가
 #define	DOP()	{			\
 	R.PC++;				\
 }
