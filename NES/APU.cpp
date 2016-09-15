@@ -21,16 +21,18 @@
 #define	NOISE_VOL	(0x0C0)
 #define	DPCM_VOL	(0x0F0)
 // Extra sounds
+// https://en.wikipedia.org/wiki/Memory_management_controller
 #define	VRC6_VOL	(0x0F0)
 #define	VRC7_VOL	(0x130)
 #define	FDS_VOL		(0x0F0)
-#define	MMC5_VOL	(0x0F0)
+#define	MMC5_VOL	(0x0F0) 
 #define	N106_VOL	(0x088)
 #define	FME7_VOL	(0x130)
 
 APU::QUEUE	APU::queue;
 APU::QUEUE	APU::exqueue;
 
+// »ı¼ºÀÚ ¿©·¯ º¯¼öµéÀ» ÃÊ±âÈ­ ½ÃÅ´
 APU::APU( NES* parent )
 {
 	exsound_select = 0;
@@ -54,6 +56,9 @@ APU::~APU()
 {
 }
 
+// apu.h¿¡ ÀÖ´Â QUEUE queue¿¡ ¸É¹öµé °ªÀ» ÀÎÀÚ·Î ¼³Á¤ÇÔ
+// wrptr &= 4095 (QUEUE_LENGTH = 4096)
+// wrptr, rdptrÀÌ °°À¸¸é ¿À¹öÇÃ·Î¿ì °æ°í¸Ş½ÃÁö
 void	APU::SetQueue( INT writetime, WORD addr, BYTE data )
 {
 	queue.data[queue.wrptr].time = writetime;
@@ -66,6 +71,10 @@ void	APU::SetQueue( INT writetime, WORD addr, BYTE data )
 	}
 }
 
+// wrptr°ú rdptrÀÌ °°Áö ¾Ê°í
+// 1¹øÂ° ÀÎÀÚ°¡ queueÀÇ time ¸É¹öÀÇ °ªº¸´Ù Å©¸é
+// 2¹øÂ° ÀÎÀÚ¿¡ queueÀÇ data¿¡ rdptrÀÇ °ªÀ» ³Ñ±ä´Ù
+// rdptr++ ÈÄ rdptr &= 4095 ÈÄ return TRUE
 BOOL	APU::GetQueue( INT writetime, QUEUEDATA& ret )
 {
 	if( queue.wrptr == queue.rdptr ) {
@@ -80,6 +89,7 @@ BOOL	APU::GetQueue( INT writetime, QUEUEDATA& ret )
 	return	FALSE;
 }
 
+// SetQueue¶û ExQueueÀÎ°Í ¿Ü¿¡ µ¿ÀÏ
 void	APU::SetExQueue( INT writetime, WORD addr, BYTE data )
 {
 	exqueue.data[exqueue.wrptr].time = writetime;
@@ -92,6 +102,7 @@ void	APU::SetExQueue( INT writetime, WORD addr, BYTE data )
 	}
 }
 
+// À§¿Í µ¿ÀÏ
 BOOL	APU::GetExQueue( INT writetime, QUEUEDATA& ret )
 {
 	if( exqueue.wrptr == exqueue.rdptr ) {
@@ -106,6 +117,7 @@ BOOL	APU::GetExQueue( INT writetime, QUEUEDATA& ret )
 	return	FALSE;
 }
 
+// ¾Æ·¡ÀÇ WriteProcess ÂüÁ¶
 void	APU::QueueFlush()
 {
 	while( queue.wrptr != queue.rdptr ) {
@@ -121,6 +133,8 @@ void	APU::QueueFlush()
 	}
 }
 
+// Detault nRate = 22050
+//
 void	APU::SoundSetup()
 {
 	INT	nRate = (INT)Config.sound.nRate;
@@ -214,6 +228,8 @@ void	APU::SyncDPCM( INT cycles )
 	}
 }
 
+// APU_INTERNAL.cpp¿¡ internal.WriteÀÇ µ¿ÀÛÀÌ ³ª¿È.
+// 0x4000 ~ 0x4017ÀÇ µ¿ÀÛÀÌ ³ª¿ÍÀÖÀ½
 void	APU::WriteProcess( WORD addr, BYTE data )
 {
 	if( addr >= 0x4000 && addr <= 0x4017 ) {
@@ -329,7 +345,7 @@ INT	nFilterType = Config.sound.nFilterType;
 	double	cycle_rate = ((double)FRAME_CYCLES*60.0/12.0)/(double)Config.sound.nRate;
 //	double	cycle_rate = (double)CPU_CLOCK/(double)Config.sound.nRate;
 
-	// CPUƒTƒCƒNƒ‹”‚ªƒ‹[ƒv‚µ‚Ä‚µ‚Ü‚Á‚½‚Ì‘Îôˆ—
+	// CPUƒTƒCƒNƒ‹”‚ªƒ‹?ƒv‚µ‚Ä‚µ‚Ü‚Á‚½‚Ì‘Îôˆ—
 	if( elapsed_time > nes->cpu->GetTotalCycles() ) {
 		QueueFlush();
 	}
@@ -390,11 +406,11 @@ INT	nFilterType = Config.sound.nFilterType;
 		output >>= 8;
 
 		if( nFilterType == 1 ) {
-			//ƒ[ƒpƒXƒtƒBƒ‹ƒ^[TYPE A(Simple)
+			//ƒ?ƒpƒXƒtƒBƒ‹??TYPE A(Simple)
 			output = (lowpass_filter[0]+output)/2;
 			lowpass_filter[0] = output;
 		} else if( nFilterType == 2 ) {
-			//ƒ[ƒpƒXƒtƒBƒ‹ƒ^[TYPE B(Weighted)
+			//ƒ?ƒpƒXƒtƒBƒ‹??TYPE B(Weighted)
 			output = (lowpass_filter[1]+lowpass_filter[0]*2+output)/4;
 			lowpass_filter[1] = lowpass_filter[0];
 			lowpass_filter[0] = output;
@@ -480,7 +496,7 @@ INT	nFilterType = Config.sound.nFilterType;
 #endif
 }
 
-// ƒ`ƒƒƒ“ƒlƒ‹‚Ìü”g”æ“¾ƒTƒuƒ‹[ƒ`ƒ“(NSF—p)
+// ?ƒƒƒ“ƒlƒ‹‚Ìü”g”æ“¾ƒTƒuƒ‹??ƒ“(NSF—p)
 INT	APU::GetChannelFrequency( INT no )
 {
 	// Internal
