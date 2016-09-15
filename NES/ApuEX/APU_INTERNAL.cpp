@@ -36,7 +36,7 @@ INT	APU_INTERNAL::noise_freq[16] = {
 	202,  254,  380,  508,  762, 1016, 2034, 4068
 };
 
-// DMC “]‘—ƒNƒƒbƒN”ƒe[ƒuƒ‹
+// DMC ?‘—ƒNƒƒbƒN”ƒe?ƒuƒ‹
 INT	APU_INTERNAL::dpcm_cycles[16] = {
 	428, 380, 340, 320, 286, 254, 226, 214,
 	190, 160, 142, 128, 106,  85,  72,  54
@@ -115,6 +115,14 @@ void	APU_INTERNAL::Setup( INT nRate )
 		trilength_lut[i] = i*samples*5;
 }
 
+// *¸É¹ö°¡ ³Ê¹« ¸¹¾Æ dataÀ§ÁÖ·Î¸¸ ¼³¸íÇÔ ºÎ°¡¼³¸í ºÎÅ¹
+// ch0 : APU_INTERNAL.h¿¡ Á¤ÀÇµÇ¾î ÀÖÀ½ ¸É¹ö °³¸¹À½ ¤²¤§¤²¤§
+// ch0.reg´Â 2¹øÂ° ÀÎÀÚ ±×´ë·Î µé¾î°¨
+// ch0ÀÇ ³ª¸ÓÁö ¸É¹öµéÀº data¿Í ºñÆ®¿¬»êÀ» ÅëÇØ ³ÖÀ½
+// CH0~4±îÁö ÀÖÀ¸¸ç °¢°¢ ´Ù¸¥ ¿ªÇÒÀ» ÇÔ
+// CH0~1 : RECTANGLE ±¸Á¶Ã¼, CH2 : TRIANGLE ±¸Á¶Ã¼, CH3 : NOISE, CH4 : DPCM
+// CH0~4±îÁö´Â 1Â÷ÀûÀ¸·Î ÇÊÅÍ¸µµÇ¾îÁ®¿Â addr 0x4000~0x4017À» 4°³¾¿ ³ª´² °¢°¢ »ç¿ëÇÑ´Ù.
+// ¶ÇÇÑ CH0~4±îÁö´Â 4°³¾¿ ³ª´©¾î »ç¿ëÇÏ±â ¶§¹®¿¡ °¢°¢ ch0.reg[0~3]±îÁö »ç¿ëÇÑ´Ù. 
 void	APU_INTERNAL::Write( WORD addr, BYTE data )
 {
 	switch( addr ) {
@@ -186,7 +194,7 @@ void	APU_INTERNAL::Write( WORD addr, BYTE data )
 			ch2.holdnote = data&0x80;
 			if( !(data&0x7F) ) {
 				ch2.enable = 0;
-				ch2.linear_length = 0;	// ~‚ß
+				ch2.linear_length = 0;	// ?‚ß
 				ch2.linear_load_disable = 0;
 			} else if( !ch2.linear_load_disable && ch2.enable ) {
 				ch2.linear_length = trilength_lut[data&0x7F];
@@ -400,7 +408,7 @@ void	APU_INTERNAL::WriteSync( WORD addr, BYTE data )
 			ch2.sync_reg[0] = data;
 			ch2.sync_holdnote = data&0x80;
 			if( !(data&0x7F) ) {
-				ch2.sync_linear_length = 0;	// ~‚ß
+				ch2.sync_linear_length = 0;	// ?‚ß
 				ch2.sync_linear_load_disable = 0;
 			} else if( !ch2.sync_linear_load_disable ) {
 				ch2.sync_linear_length = data&0x7F;
@@ -838,7 +846,7 @@ INT	APU_INTERNAL::NoiseRender( NOISE& ch )
 			ch.env_vol++;
 	}
 
-//	if( ch.freq < INT2FIX(8) ) {	// –³‘Êˆ—‘Îô‚Æ•·‚±‚¦‚È‚¢ˆ×‚Ìƒ`ƒFƒbƒN(Œ‹\Œø‚­)
+//	if( ch.freq < INT2FIX(8) ) {	// –³‘Êˆ—‘Îô‚Æ•·‚±‚¦‚È‚¢ˆ×‚Ì?ƒFƒbƒN(Œ‹?Œø‚­)
 //		return	0;
 //	}
 
@@ -927,7 +935,7 @@ INT	APU_INTERNAL::DpcmRender( DPCM& ch )
 	ch.output_vol = (ch.dpcm_output_real-ch.dpcm_output_offset)<<DPCM_VOL_SHIFT;
 #else
 #if	1
-	// ƒCƒ“ƒ`ƒLL‚¢ƒvƒ`ƒmƒCƒYƒJƒbƒg(TEST)
+	// ƒCƒ“?ƒLL‚¢ƒv?ƒmƒCƒYƒJƒbƒg(TEST)
 	ch.dpcm_output_real = (INT)((ch.reg[1]&0x01)+ch.dpcm_value*2)-0x40;
 	if( abs(ch.dpcm_output_real-ch.dpcm_output_fake) <= 8 ) {
 		ch.dpcm_output_fake = ch.dpcm_output_real;

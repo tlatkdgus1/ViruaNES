@@ -15,13 +15,15 @@
 #include "typedef.h"
 #include "macro.h"
 
-#include "APU_INTERNAL.h"
-#include "APU_VRC6.h"
+#include "APU_INTERNAL.h" // ?
+// -------- Memory management controller -----------------------
+#include "APU_VRC6.h" 
 #include "APU_VRC7.h"
-#include "APU_MMC5.h"
-#include "APU_FDS.h"
+#include "APU_MMC5.h"  
+#include "APU_FDS.h"  
 #include "APU_N106.h"
-#include "APU_FME7.h"
+#include "APU_FME7.h" 
+// 같은 Memory management controller이지만 제조사가 다르고 기능이 달라서 사용된 // 게임이 다름
 
 #define	QUEUE_LENGTH	4096
 
@@ -52,7 +54,7 @@ public:
 
 	// For NSF player
 	INT	GetChannelFrequency( INT ch );
-	LPSHORT	GetSoundBuffer() { return m_SoundBuffer; }
+	LPSHORT	GetSoundBuffer() { return m_SoundBuffer;}
 
 protected:
 	typedef	struct {
