@@ -1,3 +1,6 @@
+//ch0~4까지가 APU_INTERNAL.cpp의 주를 이룸
+
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //      APU Internal                                                    //
@@ -36,7 +39,7 @@ INT	APU_INTERNAL::noise_freq[16] = {
 	202,  254,  380,  508,  762, 1016, 2034, 4068
 };
 
-// DMC ?몭긏깓긞긏릶긡?긳깑
+//DMC전송 클록 수 테이블
 INT	APU_INTERNAL::dpcm_cycles[16] = {
 	428, 380, 340, 320, 286, 254, 226, 214,
 	190, 160, 142, 128, 106,  85,  72,  54
@@ -46,6 +49,7 @@ INT	APU_INTERNAL::decay_lut[16];
 INT	APU_INTERNAL::vbl_lut[32];
 INT	APU_INTERNAL::trilength_lut[128];
 
+// 생성자 초기화
 APU_INTERNAL::APU_INTERNAL()
 {
 	nes = NULL;
@@ -61,7 +65,7 @@ APU_INTERNAL::APU_INTERNAL()
 
 	sampling_rate = 22050;
 
-	// 돹먠믦
+	// 임시 설정
 	cycle_rate = (INT)(CPU_CLOCK*65536.0f/22050.0f);
 }
 
@@ -69,6 +73,7 @@ APU_INTERNAL::~APU_INTERNAL()
 {
 }
 
+// ch0~4까지 다 0
 void	APU_INTERNAL::Reset( INT nRate )
 {
 	ZeroMemory( &ch0, sizeof(ch0) );
@@ -77,7 +82,8 @@ void	APU_INTERNAL::Reset( INT nRate )
 	ZeroMemory( &ch3, sizeof(ch3) );
 //	ZeroMemory( &ch4, sizeof(ch4) );
 
-	// $4011궼룊딖돸궢궶궋
+	// $4011는 초기화하지 않는다.
+	// 4014와 4016은 왜 안하는가??? (의문)
 	ch4.enable = 0;
 	ch4.dmalength = 0;
 
@@ -97,6 +103,7 @@ void	APU_INTERNAL::Reset( INT nRate )
 	Write( 0x4015, 0x00 );
 	Write( 0x4017, 0xC0 );
 }
+
 
 void	APU_INTERNAL::Setup( INT nRate )
 {
@@ -333,7 +340,7 @@ BYTE	data = addr>>8;
 		}
 		if( ch3.enable && ch3.vbl_length > 0 ) data |= 0x08;
 		if( ch4.enable && ch4.dmalength )      data |= 0x10;
-//		if( ch4.irq_enable ) data |= 0x80; // Sync궳렳몧궢궲궇귡
+//		if( ch4.irq_enable ) data |= 0x80; // Sync에서 구현되어 있다
 	}
 
 	return	data;
@@ -364,6 +371,8 @@ INT	APU_INTERNAL::Process( INT channel )
 	return	0;
 }
 
+// 위의 Write함수와 동작이 비슷하다.
+// 차이점은 sync에 관련된 맴버들에 접근한다는 점이다.
 void	APU_INTERNAL::WriteSync( WORD addr, BYTE data )
 {
 	switch( addr ) {
@@ -525,6 +534,7 @@ void	APU_INTERNAL::WriteSync( WORD addr, BYTE data )
 	}
 }
 
+// addr의 값에 따라서 다른 data 값을 반환함
 BYTE	APU_INTERNAL::ReadSync( WORD addr )
 {
 BYTE	data = addr>>8;

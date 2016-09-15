@@ -35,7 +35,7 @@ APU::QUEUE	APU::exqueue;
 // 생성자 여러 변수들을 초기화 시킴
 APU::APU( NES* parent )
 {
-	exsound_select = 0;
+	exsound_select = 0; // 어떤 mmc를 설정 할 것인가에 대해 영향을 미치는 변수
 
 	nes = parent;
 	internal.SetParent( parent );
@@ -133,8 +133,8 @@ void	APU::QueueFlush()
 	}
 }
 
-// Detault nRate = 22050
-//
+// Detault Config.sound.nRate = 22050
+// Setup 함수는 각각의 mmc의 cpp파일에 있다.
 void	APU::SoundSetup()
 {
 	INT	nRate = (INT)Config.sound.nRate;
@@ -147,6 +147,8 @@ void	APU::SoundSetup()
 	fme7.Setup( nRate );
 }
 
+// queue, exqueue 초기화, mmc.Reset함수 호출
+// 마지막 SoundSetup()은 default 값 설정을 의미
 void	APU::Reset()
 {
 	::ZeroMemory( &queue, sizeof(queue) );
@@ -166,16 +168,20 @@ void	APU::Reset()
 	SoundSetup();
 }
 
+// exsound_select를 1번째 인자의 값으로 설정
 void	APU::SelectExSound( BYTE data )
 {
 	exsound_select = data;
 }
 
+// addr에 따라서 다른 값의 리턴 값을 internal.ReadSync(addr)을 통해 넘겨받음
+// APU_INTERNAL.cpp에 동작이 나옴
 BYTE	APU::Read( WORD addr )
 {
 	return	internal.ReadSync( addr );
 }
 
+// APU_INTERNAL.cpp WriteSync 참조
 void	APU::Write( WORD addr, BYTE data )
 {
 	if( addr >= 0x4000 && addr <= 0x4017 ) {
