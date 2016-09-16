@@ -558,6 +558,7 @@ BYTE	data = addr>>8;
 	return	data;
 }
 
+// ch0 ~ ch3 Sync Ω√≈¥
 void	APU_INTERNAL::VSync()
 {
 
@@ -580,6 +581,7 @@ void	APU_INTERNAL::VSync()
 		ch3.sync_vbl_length -= sync_count_rate;
 }
 
+// ch4 Sync Ω√≈¥
 inline	BOOL	APU_INTERNAL::Sync( INT cycles )
 {
 BOOL	bIRQ = FALSE;

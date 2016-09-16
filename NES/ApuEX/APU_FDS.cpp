@@ -1,3 +1,5 @@
+//Famicom Disk System
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //      FDS plugin                                                      //
@@ -11,7 +13,7 @@
 
 HINSTANCE CFDSplugin::hFDSplugin = NULL;
 
-// プラグインをロードしておく為だけのインスタンス(ぉ
+// プラグインをロ?ドしておく為だけのインス?ンス(ぉ
 CFDSplugin FDSplugin;
 
 CFDSplugin::CFDSplugin()
@@ -116,6 +118,8 @@ BYTE	data = 0;
 	return	data;
 }
 
+// hFDS default = NULL
+// FDSplug_Sync()ﾀｺ FDSplugin.dllﾀﾇ FDS_Syncｸｦ ｽﾇﾇ猊ﾔ. 
 BOOL	APU_FDS::Sync( INT cycles )
 {
 	if( hFDS ) {

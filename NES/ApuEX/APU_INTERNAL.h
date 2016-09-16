@@ -179,7 +179,7 @@ protected:
 	RECTANGLE	ch1;
 	TRIANGLE	ch2;
 	NOISE		ch3;
-	DPCM		ch4;
+	DPCM		ch4; 
 
 	// Tables
 	static	INT	vbl_length[32];

@@ -182,6 +182,7 @@ BYTE	APU::Read( WORD addr )
 }
 
 // APU_INTERNAL.cpp WriteSync 참조
+// SetQueue는 위에 동작이 나옴
 void	APU::Write( WORD addr, BYTE data )
 {
 	if( addr >= 0x4000 && addr <= 0x4017 ) {
@@ -190,6 +191,7 @@ void	APU::Write( WORD addr, BYTE data )
 	}
 }
 
+// 위의 Read와 ExQueue 제외 동일
 BYTE	APU::ExRead( WORD addr )
 {
 BYTE	data = 0;
@@ -208,6 +210,7 @@ BYTE	data = 0;
 	return	data;
 }
 
+// 위의 Write와 ExQueue 제외 동일
 void	APU::ExWrite( WORD addr, BYTE data )
 {
 	SetExQueue( nes->cpu->GetTotalCycles(), addr, data );
@@ -219,11 +222,15 @@ void	APU::ExWrite( WORD addr, BYTE data )
 	}
 }
 
+// APU_INTERNAL.cpp 참조
 void	APU::Sync()
 {
 	internal.VSync();
 }
 
+// internal에 ch4(DPCM)의 맴버 sync_irq_enable가 TRUE면 internal.Sync()의 Return 값은 TURE
+// 즉, sync_irq_enable가 TRUE면 IRQ_NotPending() 실행
+// exsound_select & 0x04가 TRUE면 fds.Sync 실행(APU_FDS.cpp 참조) 
 void	APU::SyncDPCM( INT cycles )
 {
 	if( internal.Sync( cycles ) ) {
@@ -243,6 +250,7 @@ void	APU::WriteProcess( WORD addr, BYTE data )
 	}
 }
 
+// 위와 비슷하다. 대상이 바뀌고 addr의 범위가 다르다.
 void	APU::WriteExProcess( WORD addr, BYTE data )
 {
 	if( exsound_select & 0x01 ) {
@@ -269,6 +277,7 @@ void	APU::WriteExProcess( WORD addr, BYTE data )
 	}
 }
 
+// 도와주이소
 void	APU::Process( LPBYTE lpBuffer, DWORD dwSize )
 {
 INT	nBits = Config.sound.nBits;
@@ -351,7 +360,7 @@ INT	nFilterType = Config.sound.nFilterType;
 	double	cycle_rate = ((double)FRAME_CYCLES*60.0/12.0)/(double)Config.sound.nRate;
 //	double	cycle_rate = (double)CPU_CLOCK/(double)Config.sound.nRate;
 
-	// CPU긖귽긏깑릶궕깑?긵궢궲궢귏궯궫렄궻뫮랉룉뿚
+	//CPU주기 수가 루프했을 때의 대책 처리
 	if( elapsed_time > nes->cpu->GetTotalCycles() ) {
 		QueueFlush();
 	}
@@ -412,18 +421,18 @@ INT	nFilterType = Config.sound.nFilterType;
 		output >>= 8;
 
 		if( nFilterType == 1 ) {
-			//깓?긬긚긲귻깑??TYPE A(Simple)
+			//로 패스 필터 TYPE A(Simple)
 			output = (lowpass_filter[0]+output)/2;
 			lowpass_filter[0] = output;
 		} else if( nFilterType == 2 ) {
-			//깓?긬긚긲귻깑??TYPE B(Weighted)
+			//로 패스 필터 TYPE B(Weighted)
 			output = (lowpass_filter[1]+lowpass_filter[0]*2+output)/4;
 			lowpass_filter[1] = lowpass_filter[0];
 			lowpass_filter[0] = output;
 		}
 
 #if	1
-		// DC맟빁궻긇긞긣
+		//DC성분의 컷
 		{
 		static double ave = 0.0, max=0.0, min=0.0;
 		double delta;
@@ -438,7 +447,7 @@ INT	nFilterType = Config.sound.nFilterType;
 		}
 #endif
 #if	0
-		// DC맟빁궻긇긞긣(HPF TEST)
+		//DC성분의 컷(HPF TEST)
 		{
 		static	double	cutoff = (2.0*3.141592653579*5.0/44100.0);
 		static	double	tmp = 0.0;
@@ -452,7 +461,7 @@ INT	nFilterType = Config.sound.nFilterType;
 		}
 #endif
 #if	0
-		// 긚긬귽긏긩귽긛궻룣땸(AGC TEST)
+		//스파이크 노이즈 제거(AGC TEST)
 		{
 		INT	diff = abs(output-last_data);
 		if( diff > 0x4000 ) {
@@ -502,7 +511,7 @@ INT	nFilterType = Config.sound.nFilterType;
 #endif
 }
 
-// ?긿깛긨깑궻뢂봥릶롦벦긖긳깑??깛(NSF뾭)
+//채널 주파수 취득 서브 루틴(NSF용)
 INT	APU::GetChannelFrequency( INT no )
 {
 	// Internal
